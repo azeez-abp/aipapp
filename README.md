@@ -5,3 +5,4 @@
 - Data collection component
 - Data processing component
 - Feature extraction with nearnest neighbour
+- Noting
