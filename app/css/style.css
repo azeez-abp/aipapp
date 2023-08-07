@@ -13,7 +13,7 @@ body
         overflow: hidden;
 }
 
-button.undo ,button.reset
+button.undo ,button.reset,button.next,button.save,button.prev
 {
         width: 5rem;
         height: 42px;
@@ -23,7 +23,7 @@ button.undo ,button.reset
         cursor: pointer;
 }
 
-button.undo:disabled,button.reset:disabled
+button.undo:disabled,button.reset:disabled,button.next:disabled,button.save:disabled,button.prev:disabled
 {
         background-color: rgba(0, 0, 225, 0.3);
         pointer-events: none;
@@ -40,7 +40,7 @@ button.undo:disabled,button.reset:disabled
         gap: 10px;
 }
 
-.form
+.form,.save-form
 {
         display: flex;
         align-items: center;

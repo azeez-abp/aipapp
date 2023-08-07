@@ -5,8 +5,12 @@ class SketchPad
       * @container:html element
       * @size: int size of the item in container 
       */   
+     #path
+     #wholeObjectPath
      constructor(container,width = 400, height = 400)
      {
+        this.#path  = []
+        this.#wholeObjectPath  = []
         this.canvas  = document.createElement('canvas');
         this.canvas.width = width;
         this.canvas.height = height;
@@ -14,23 +18,26 @@ class SketchPad
                                 box-shadow: 0px 0px 10px 2px #333;
                                 `
         container.appendChild(this.canvas);
-
-        this.undoBtn   = document.createElement("button");
-        this.undoBtn.setAttribute('class','undo')
-        this.undoBtn.setAttribute('disabled','true')
-        this.undoBtn.innerText = "Erase"
-        container.appendChild(this.undoBtn)
-
-        this.reset   = document.createElement("button");
-        this.reset.setAttribute('class','reset')
-        this.reset.setAttribute('disabled','true')
-        this.reset.innerText = "Reset"
-        container.appendChild(this.reset)
-    
+        
+        let btnContainer  = `<div class="button-container">
+               <button class="undo" disabled="true"  >Undo</button>
+               <button class="reset" disabled="true" >Reset</button>
+               <button class="next" disabled="true" >→</button>
+              
+          </div>`
+      
+        container.insertAdjacentHTML('beforeEnd', btnContainer)
         this.cxt = this.canvas.getContext('2d')
-        this.path  = [];
+    
         this.isDrwaing  = false;
+        this.undoBtn  = document.querySelector("button.undo")
+        this.reset  = document.querySelector("button.reset")
+        this.next  = document.querySelector("button.next")
+      
+       
         this.#addEventListers();
+       
+      
 
      }  
      /**
@@ -42,15 +49,16 @@ class SketchPad
      #addEventListers()
      {
           this.canvas.onmousedown = (evt) =>
-          {     
+          {     this.isDrwaing = true; 
                 const objectRectangle  = this.canvas.getBoundingClientRect()
                 const mouse  = {
                         x : Math.round(evt.clientX - objectRectangle.x),
                         y : Math.round(evt.clientY - objectRectangle.y)
                 }
 
-                this.path  = [mouse];
-                this.isDrwaing = true;  
+              this.#path  = [mouse];
+           
+               
               
           }
 
@@ -64,9 +72,10 @@ class SketchPad
                           y : Math.round(evt.clientY - objectRectangle.y)
                   }
   
-                  this.path.push(mouse);
-                //  this.#redraw();
-                  this.#draw(this.path)
+                  this.#path.push(mouse);
+                  this.#draw(this.#path)
+                
+                  console.log(this.#path, this.#wholeObjectPath)
 
                   if (this.undoBtn.hasAttribute("disabled"))
                   {
@@ -77,12 +86,20 @@ class SketchPad
                   {
                         this.reset.removeAttribute("disabled")  
                   }
+
+                  if (this.next.hasAttribute("disabled"))
+                  {
+                        this.next.removeAttribute("disabled")  
+                  }
               
             }
           }
 
-          this.canvas.onmouseup  = (evt) => {
+          document.onmouseup  = (evt) => {
+           // this.#wholeObjectPath  = [...this.#wholeObjectPath,...this.#path]
+           this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
             this.isDrwaing  = false
+
           }
 
           /**
@@ -108,33 +125,14 @@ class SketchPad
                   this.canvas.onmousemove(loc)
           },{ passive: true })
 
-          this.canvas.ontouchend = (evt) => 
+          document.ontouchend = (evt) => 
           {
             this.isDrwaing  = false
           }
-          this.undoBtn.onclick  = (evt)=>
-          {       
 
-            let rect   =  this.undoBtn.getBoundingClientRect()
+          this.undoBtn.onclick  = ()=>this.#undo()
+          this.reset.onclick  = ()=>this.#reset()
       
-                  if (this.path.length <= 1 ) 
-
-                  {     this.reset.setAttribute("disabled","true");
-                        return this.undoBtn.setAttribute("disabled","true");
-                  }
-                 
-                        this.path.pop();
-                        this.#redraw();
-                        this.#draw(this.path);
-         
-          }
-
-           this.reset.onclick  = ()=>
-           {
-                  this.#reset()
-                  this.reset.setAttribute("disabled","true");
-                  this.undoBtn.setAttribute("disabled","true");
-           }
      }
 
      /**
@@ -145,35 +143,75 @@ class SketchPad
           this.cxt.clearRect(x1, y1, x2, y2);
     }
 
-    #draw(path,color = "black")
-    {
-          this.cxt.strokeStyle  = color;
-          this.cxt.lineWidth = 3;
-          this.cxt.beginPath();
-          this.cxt.moveTo(path[0]['x'],path[0]['y']);
+    #draw(path, cxt =this.cxt ,color = "black")
+    {    
+            cxt.strokeStyle  = color;
+            cxt.lineWidth = 3;
+            cxt.beginPath();
+            cxt.moveTo(path[0]['x'],path[0]['y']);
       
-          for (let i  = 1; i < path.length; i++)
+            for (let i  = 1; i < path.length; i++)
           {
-                  this.cxt.lineTo(path[i]['x'], path[i]['y']);
+                  cxt.lineTo(path[i]['x'], path[i]['y']);
           }
-          this.cxt.lineCap  = "round" 
-          this.cxt.lineJoin  = "round"
-          this.cxt.stroke();
+          
+            cxt.lineCap  = "round" 
+          //this.cxt.lineJoin  = "round"
+            cxt.stroke();
 
     }
-
+    static drawImageFromPath(paths,cxt)
+    {
+            this.#draw(paths,cxt)
+    }
     #reset()
     {       
-            this.path  = [];
+            this.#path  = [];
+            this.#wholeObjectPath = [];
             this.isDrwaing = false
             this.#redraw()
+            this.reset.setAttribute("disabled","true");
+            this.undoBtn.setAttribute("disabled","true");
+            this.next.setAttribute("disabled","true");
+    }
+    reset2()
+    {
+      this.#reset()
     }
 
-    download()
+    #undo()
     {
-            
+      if (this.#path.length <= 1 ) 
+      {    
+            this.reset.setAttribute("disabled","true");
+            this.undoBtn.setAttribute("disabled","true");
+            this.next.setAttribute("disabled","true");
+            return
+      }
+     
+            this.#path.pop();
+            this.#redraw();
+            this.#draw(this.#path);
     }
+    
+    getPath()
+    {
+            return this.#wholeObjectPath
+    }
+    setPath(path)
+    {
+      this.#path  = path
+      this.#redraw()
+    }
+   
 
 }
 
+// if(typeof module !== 'undefined')
+// {
+//       module.exports = {SketchPad}
+// }
+           
+// window.SketchPad  = SketchPad
 export default SketchPad
+// export const draw  =SketchPad.drawImageFromPath
