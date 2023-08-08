@@ -80,7 +80,7 @@ class SketchPad
                   this.#path.push(mouse);
                   this.#draw(this.#path)
                 
-                  console.log(this.#path, this.#wholeObjectPath)
+               //   console.log(this.#path, this.#wholeObjectPath)
 
                   if (this.undoBtn.hasAttribute("disabled"))
                   {
@@ -101,9 +101,17 @@ class SketchPad
           }
 
           document.onmouseup  = (evt) => {
+
            // this.#wholeObjectPath  = [...this.#wholeObjectPath,...this.#path]
-           this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
+           console.log(evt.target.className)
+           if(evt.target.className === 'undo'){
+                this.#wholeObjectPath[this.#wholeObjectPath.length -1]  = this.#path
+           }else{
+                this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
+           }
+          
             this.isDrwaing  = false
+           
 
           }
 
@@ -141,7 +149,7 @@ class SketchPad
      }
 
      /**
-      * clearCtx - method to clear the content of the canvas
+      * redraw - method to clear the content of the canvas
       * @x1 initial position on x-axis
       * @y1 initial position on y-axis
       * @x2 final axis on x-axis
@@ -151,8 +159,7 @@ class SketchPad
     {
           this.cxt.clearRect(x1, y1, x2, y2);
 
-       
-
+         
     }
     
     /**
@@ -176,9 +183,11 @@ class SketchPad
             cxt.stroke();
 
             if(this.onUpdate){
-              this.onUpdate(this.getPath() )
-            }
-  
+                this.onUpdate(this.getPath() )
+                return
+              }
+           
+
 
     }
     /**
@@ -260,8 +269,10 @@ class SketchPad
      * getPath - method that retun all the path drawn
     */
     getPath()
-    {
+    {      
+            
             return this.#wholeObjectPath
+
     }
      /**
      * setPath - method that give path to the canvas
@@ -275,11 +286,3 @@ class SketchPad
 
 }
 
-// if(typeof module !== 'undefined')
-// {
-//       module.exports = {SketchPad}
-// }
-           
-// window.SketchPad  = SketchPad
-export default SketchPad
-// export const draw  =SketchPad.drawImageFromPath

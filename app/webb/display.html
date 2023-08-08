@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+</head>
+<style type="text/css">
+        .body{
+              color: #fff;
+        }
+        .row{
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                margin-top: 6px;
+                margin-bottom: 18px;
+                background: #000;
+             
+        }
+        .row div{
+                width: 20%;
+        }
+        img{
+                width: 20%;
+                background-color: #fff;
+               
+
+        }
+
+    .chart-drawpad {
+          display: flex;
+          flex-direction: row-reverse;;
+          justify-content: space-between;
+          margin: 10px 0;
+          /**
+          the two properties the the transparent background
+          */
+          outline: 2000px solid rgba(0,0,0,.5);
+          background-color: rgba(0,0,0,.5);
+          overflow: hidden;
+        }
+        .hidden{
+          display: none;
+        }
+        .show-table{
+          background-color: aqua;
+           padding: 4px;
+           border-radius: 6px;
+           height: 42px;
+           border: none;
+           color: #fff;
+           margin: 10px 0px;
+           cursor: pointer;
+           position: relative;
+           z-index: 10;
+           font-size: 16px;
+          font-weight: 800;
+        }
+        .button-container button {
+            background: blue;
+            border: navajowhite;
+            padding: 7px;
+            color: #fff;
+            border-radius: 4px;
+            width: 70px;
+            cursor: pointer;
+        }
+        .button-container button:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        @media screen and (max-width:650px) {
+          .chart-drawpad {
+          flex-direction: column-reverse;
+       
+          overflow: hidden;
+        }
+        }
+</style>
+<body>
+     <button class="show-table" type="button">Hide graph and drawpad</button>   
+ <div class="body"></div>
+
+ <div class="chart-drawpad">
+    <div class="chart"></div>
+
+    <div class="content"> 
+   
+      <div class="label"></div>
+    <div id="sketch-pad-container"> </div>
+  </div>
+ </div>
+
+
+
+</body>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript" src="/aipapp/app/js/chart/graphics.js"></script>
+<script type="text/javascript" src="/aipapp/app/js/chart/math.js"></script>
+<script type="text/javascript" src="/aipapp/app/js/chart/chart.js"></script>
+<script type="text/javascript" src="../js/sketchPadwindow.js"></script>
+
+
+
+<script>
+
+
+function grp(items,key){
+ let res = {}
+ let each  = [];
+  for (let i = 0; i < items.length ; i++)
+  {   
+      
+        console.log(items[i][key])
+      
+     if(res[items[i][key]]) {
+        each.push(items[i]);
+        res[items[i][key]]  = [ ...res[items[i][key]], items[i]]
+     }else{
+        res[items[i][key]]  = [items[i]]
+     }
+
+  }
+   
+  return res;
+
+}
+
+function createRowDisplay(objContent)
+{       let htmlTag  =``;
+        for (key in objContent)
+        {
+              let each   =   objContent[key] 
+              let img  = `` 
+              each.forEach( (obj)=> {
+                img   += `<div class="sample_${obj.id}"><img src  = ${`/aipapp/app/data/dataset/img/${obj.id}.png`} /></div>`
+    
+              });
+   
+          console.log(each , "OBJ")
+         htmlTag  += `<div class = "row">
+                                    <div>${ each[0].student_name}</div>
+                                 ${ img}
+                        </div>`
+        } 
+
+        document.querySelector(".body").insertAdjacentHTML("afterbegin",htmlTag)
+
+
+}
+
+const fileUrl = '/aipapp/app/data/dataset/sample.json'; // Replace with the actual URL
+
+fetch(fileUrl)
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.status}`);
+    }
+    return response.json(); // or response.blob() if it's not a text file
+  })
+  .then(fileContent => {
+   // console.log('File content:', fileContent);
+   let item  =  grp(fileContent,'student_id')
+
+   createRowDisplay(item)
+  })
+  .catch(error => {
+    console.error('Error fetching file:', error);
+  });
+
+
+  const fileUrlFeature = '/aipapp/app/data/dataset/feature.json'; // Replace with the actual URL
+
+
+  fetch(fileUrlFeature )
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`Network response was not ok: ${response.status}`);
+    }
+    return response.json(); // or response.blob() if it's not a text file
+  })
+  .then(fileContent => {
+
+   function handleClick(evt) {
+      if(!evt) return
+      const el  = document.querySelector(".sample_"+evt.id)
+      document.querySelectorAll("div[class *='sample_']").forEach((el)=>{
+        el.firstChild.removeAttribute('style')
+      })
+      el.firstChild.style.backgroundColor = "yellow"
+    el.scrollIntoView({
+      behavior:"smooth",
+      block:"center"
+    })
+      console.log(el,evt)
+    }
+   
+
+
+    const options  = {
+        width:400,
+        height:400,
+        axesLabels:fileContent.FeatureName,
+        styles : {
+          car : {color:"indigo",image:"🚗", text:"🚗 ca"},
+          bicycle:{color:"red",image:"🚲",text:"🚲 bi"},
+          clock:{color:"yellow",image:"🕰️",text:"🕰️ cl"},
+          tree:{color:"black",image:"🌲",text:"🌲tr"},
+          transpirency:0.7,
+         
+        }
+        ,
+        icon:"text",
+        //onclick: handleClick
+    }
+  
+    let constainer  = document.querySelector(".chart")
+    const row  = fileContent.sample.map(data=>{
+           
+            data = {...data,point:data.points}
+          return (data)
+    }  )
+    console.log('File content :', fileContent,row);
+     const chart = new Chart(constainer, row,options,handleClick  )
+ 
+   
+    /**
+    console.log('File content :', fileContent);
+    
+    const options  = {
+        width:400,
+        height:400,
+        hAxis: { title: fileContent.FeatureName[0] }, // hAxis should be an object with 'title'
+        vAxis: { title: fileContent.FeatureName[1] }, // vAxis should be an object with 'title'
+        legend:{position:"none"},
+        explorer:{
+          maxZoomIn:0.01,
+          actions: ['dragToZoom','rightClickToReset']
+        }
+
+    }
+
+    google.charts.load('current',  {packages:["corechart"] })
+
+    google.charts.setOnLoadCallback(()=>{
+      var data = new google.visualization.DataTable();
+    data.addColumn('number', options.hAxix);
+    data.addColumn('number',options.vAxis);
+    const row  = fileContent.sample.map(data=>data.points)
+    data.addRows(row);
+    
+     let constainer  = document.querySelector(".chart")
+   
+    const chart = new google.visualization.ScatterChart(constainer);
+   chart.draw(data, options);
+    
+    console.log(data,constainer,options)
+
+    })
+*/
+////////////////////////////////////////////
+
+  })
+  .catch(error => {
+    console.error('Error fetching file:', error);
+  });
+
+
+
+
+
+  let SketchPad2  = new SketchPad(document.querySelector(".content"),400,400,(path)=>{
+    //console.log(path, "AP")
+  })
+  
+  document.querySelector(".show-table").addEventListener('click',(ev)=>{
+    const el  = document.querySelector('.chart-drawpad')
+    const target  = ev.currentTarget 
+      el.classList.toggle("hidden")
+      el.classList.contains("hidden") ? (target.innerText  = "Show graph and drawpad") :  (target.innerText  = "Hide graph and drawpad")
+  })
+</script>
+</html>

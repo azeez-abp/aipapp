@@ -17,20 +17,24 @@ export default class User
                     
           
                  
-                document.querySelector("button.save").addEventListener('click' , ()=>{
-                        this.user.name  = document.querySelector(`input.user`).value
-                        this.user.session   = randomStr(30,false,false,false) ;
-                        
-                        if (!this.user.name)
-                        {
-                          return alert("User name is require")
+                document.querySelector("body").addEventListener('click' , (ev)=>{
+                            console.log(ev.target.parentElement.parentElement.className, ev.currentTarget)
+                        if(ev.target.parentElement.parentElement.className === 'form' && ev.target.className === 'save'){
+                                this.user.name  = document.querySelector(`input.user`).value
+                                this.user.session   = randomStr(30,false,false,false) ;
+                                
+                                if (!this.user.name)
+                                {
+                                  return alert("User name is require")
+                                }
+                                document.querySelector(".content").classList.remove("hidden")
+                                document.querySelector(".form").classList.add("hidden")
+                                document.querySelector(".label").innerText  = `Draw ${this.#label[this.#index]}`
+                                 this.#allData.personalInfo  = this.user
+                               
+                                console.log(sketchBoard,this.user)
                         }
-                        document.querySelector(".content").classList.remove("hidden")
-                        document.querySelector(".form").classList.add("hidden")
-                        document.querySelector(".label").innerText  = `Draw ${this.#label[this.#index]}`
-                         this.#allData.personalInfo  = this.user
-                       
-                        console.log(sketchBoard,this.user)
+                        
 
                 })
            

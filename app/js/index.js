@@ -1,6 +1,9 @@
 import SketchPad from "./sketchPad.js";
 import User from "./userData.js";
 
+window.SKT  = {
+        SketchPad 
+}
 
 window.addEventListener('load', function(){
 
