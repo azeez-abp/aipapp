@@ -101,8 +101,11 @@ class SketchPad
           }
 
           document.onmouseup  = (evt) => {
-           // this.#wholeObjectPath  = [...this.#wholeObjectPath,...this.#path]
-           this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
+            if(evt.target.className === 'undo'){
+              this.#wholeObjectPath[this.#wholeObjectPath.length -1]  = this.#path
+         }else{
+              this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
+         }
             this.isDrwaing  = false
 
           }
