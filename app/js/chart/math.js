@@ -13,6 +13,7 @@ math.invLerp=(a,b,v)=>{
 }
 
 math.remap=(oldA,oldB,newA,newB,v)=>{
+  
    return math.lerp(newA,newB,math.invLerp(oldA,oldB,v));
 }
 
@@ -45,7 +46,10 @@ math.scale=(p,scaler)=>{
       p[1]*scaler
    ];
 }
-
+/**
+ * distance - calculate distance between two points given 
+ *            using pythagoras theory
+*/
 math.distance=(p1,p2)=>{
    return Math.sqrt(
       (p1[0]-p2[0])**2+

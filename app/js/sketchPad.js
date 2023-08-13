@@ -108,6 +108,11 @@ class SketchPad
          }
             this.isDrwaing  = false
 
+            if(this.onUpdate){
+              this.onUpdate(this.getPath() )
+              return
+            }
+
           }
 
           /**
@@ -178,9 +183,6 @@ class SketchPad
           //this.cxt.lineJoin  = "round"
             cxt.stroke();
 
-            if(this.onUpdate){
-              this.onUpdate(this.getPath() )
-            }
   
 
     }

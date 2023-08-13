@@ -25,3 +25,6 @@ body{
      .emphasize{
         background-color:yellow;
      }
+     .blur{
+      filter: blur(5px);
+     }

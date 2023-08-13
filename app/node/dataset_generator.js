@@ -9,6 +9,7 @@ constants.JSON_DIR  = constants.DATASET_DIR +"/json";
 constants.IMG_DIR  = constants.DATASET_DIR +"/img";
 constants.SAMPLE  = constants.DATASET_DIR +"/sample.json";
 constants.FEATURE  = constants.DATASET_DIR +"/feature.json";
+constants.FEATURE_RANGE  = constants.DATASET_DIR +"/feature_range.json";
 
 const fs  = require("fs");
 const {createCanvas}   = require('canvas');

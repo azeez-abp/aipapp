@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Document</title>
+        <link href="../css/chart_demo.css" rel="stylesheet" />
 </head>
 <style type="text/css">
         .body{
@@ -80,6 +81,11 @@
           overflow: hidden;
         }
         }
+        .color{
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+        }
 </style>
 <body>
      <button class="show-table" type="button">Hide graph and drawpad</button>   
@@ -87,7 +93,7 @@
 
  <div class="chart-drawpad">
     <div class="chart"></div>
-
+     <div class="color"></div>
     <div class="content"> 
    
       <div class="label"></div>
@@ -103,6 +109,7 @@
 <script type="text/javascript" src="/aipapp/app/js/chart/math.js"></script>
 <script type="text/javascript" src="/aipapp/app/js/chart/chart.js"></script>
 <script type="text/javascript" src="../js/sketchPadwindow.js"></script>
+<script type="text/javascript" src="../js/colorThread.js"></script>
 
 
 
@@ -173,7 +180,7 @@ fetch(fileUrl)
   });
 
 
-  const fileUrlFeature = '/aipapp/app/data/dataset/feature.json'; // Replace with the actual URL
+  const fileUrlFeature = '/aipapp/app/data/dataset/feature_range.json'; // Replace with the actual URL
 
 
   fetch(fileUrlFeature )
@@ -185,6 +192,11 @@ fetch(fileUrl)
   })
   .then(fileContent => {
 
+    
+    /**
+     * handleClick - when any point is click in the graph 
+     *                it will srow to item on the table
+    */
    function handleClick(evt) {
       if(!evt) return
       const el  = document.querySelector(".sample_"+evt.id)
@@ -196,7 +208,7 @@ fetch(fileUrl)
       behavior:"smooth",
       block:"center"
     })
-      console.log(el,evt)
+     // console.log(el,evt)
     }
    
 
@@ -204,28 +216,117 @@ fetch(fileUrl)
     const options  = {
         width:400,
         height:400,
-        axesLabels:fileContent.FeatureName,
+        axesLabels:fileContent.featureNames,
         styles : {
           car : {color:"indigo",image:"🚗", text:"🚗 ca"},
           bicycle:{color:"red",image:"🚲",text:"🚲 bi"},
           clock:{color:"yellow",image:"🕰️",text:"🕰️ cl"},
           tree:{color:"black",image:"🌲",text:"🌲tr"},
-          transpirency:0.7,
+          
          
         }
         ,
         icon:"text",
+        transparency:0.6,
         //onclick: handleClick
     }
   
     let constainer  = document.querySelector(".chart")
-    const row  = fileContent.sample.map(data=>{
-           
-            data = {...data,point:data.points}
+    const row  = fileContent.samples.map(data=>{
+              console.log(data, "DATA")
+          //  data = {...data,point:data.points}
           return (data)
     }  )
-    console.log('File content :', fileContent,row);
+     console.log(row)
+
+    //[{x,y},{x,y},{x,y}] for clustering the data [{all x point}, {all y point}]
      const chart = new Chart(constainer, row,options,handleClick  )
+      
+
+
+     /**
+      * When drawing on the sketch pad get the path and points
+     */
+    
+
+const movePontOnChartAsWeDrawOnDrawingPad  = (paths)=>{
+     let pathCount  = paths.length;
+     let pointCount  = 0;
+     paths.forEach((p)=>{
+        pointCount += p.length
+     })
+       let feature  = [pathCount, pointCount]
+
+       chart.showDynamicPoint(feature)
+       
+      // console.log(feature)
+  }
+  let SketchPad2  = new SketchPad(document.querySelector(".content"),400,400, movePontOnChartAsWeDrawOnDrawingPad )
+  
+
+  /**
+   * function to toggle hide-show of pad and chart
+  */
+  document.querySelector(".show-table").addEventListener('click',(ev)=>{
+    const el  = document.querySelector('.chart-drawpad')
+    const target  = ev.currentTarget 
+      el.classList.toggle("hidden")
+      el.classList.contains("hidden") ? (target.innerText  = "Show graph and drawpad") :  (target.innerText  = "Hide graph and drawpad")
+  })
+
+
+
+
+     /**
+      * get color palette
+     */
+    
+function webWorkerColorPalette (){
+let batchSize   = 2;
+function processBatch(currentIndex,batchSize) {
+    const endIndex = batchSize;//Math.min(currentIndex + batchSize, numColors);
+    console.log(currentIndex,batchSize)
+    //const batchHtml = generateColor(currentIndex, endIndex);
+    const worker = new Worker("../js/colorThread.js");
+    
+    worker.postMessage({ message: "batch", data: {currentIndex,endIndex} });
+    worker.onmessage = (ev)=>{
+       let {currentIndex, endIndex}  = ev.data.next
+       let {data}  = ev.data
+       const ele= document.querySelector(".color")
+       ele.style = `display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 400px;
+    width:400px;
+    overflow-y: auto;
+    `
+ ele.insertAdjacentHTML('beforeEnd',data)
+
+        //console.log(data)
+        if (currentIndex < 256) {
+           // console.log(currentIndex, endIndex , "NEW")
+              setTimeout(()=>processBatch(currentIndex, endIndex), 2);
+          } else {
+              self.postMessage({ message: "done" });
+          }
+
+    }
+  
+
+
+
+}
+
+processBatch(0, batchSize )
+}
+//webWorkerColorPalette ()
+
+
+
+
+
+
  
    
     /**
@@ -263,25 +364,47 @@ fetch(fileUrl)
     })
 */
 ////////////////////////////////////////////
+function testCanvas()
+{
+  c = document.querySelector("canvas")
+  ctx  = c.getContext("2d")
+  ctx.onmouseover = (ev)=>{
+     console.log(ev)
+  }
+  ctx.beginPath();
+   ctx.fillStyle="red";
+   ctx.arc(...[ c.width/2,c.height/2],100/2,0,Math.PI*2);
+   ctx.fill();
+}
+//testCanvas()
 
-  })
-  .catch(error => {
+
+
+  }).catch(error => {
     console.error('Error fetching file:', error);
   });
 
 
+    
 
 
-
-  let SketchPad2  = new SketchPad(document.querySelector(".content"),400,400,(path)=>{
-    //console.log(path, "AP")
-  })
   
-  document.querySelector(".show-table").addEventListener('click',(ev)=>{
-    const el  = document.querySelector('.chart-drawpad')
-    const target  = ev.currentTarget 
-      el.classList.toggle("hidden")
-      el.classList.contains("hidden") ? (target.innerText  = "Show graph and drawpad") :  (target.innerText  = "Hide graph and drawpad")
-  })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>
 </html>

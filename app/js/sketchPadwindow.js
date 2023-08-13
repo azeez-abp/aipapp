@@ -79,7 +79,7 @@ class SketchPad
   
                   this.#path.push(mouse);
                   this.#draw(this.#path)
-                
+               
                //   console.log(this.#path, this.#wholeObjectPath)
 
                   if (this.undoBtn.hasAttribute("disabled"))
@@ -102,15 +102,19 @@ class SketchPad
 
           document.onmouseup  = (evt) => {
 
-           // this.#wholeObjectPath  = [...this.#wholeObjectPath,...this.#path]
-           console.log(evt.target.className)
            if(evt.target.className === 'undo'){
                 this.#wholeObjectPath[this.#wholeObjectPath.length -1]  = this.#path
            }else{
                 this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
            }
-          
+            
+         
             this.isDrwaing  = false
+            
+            if(this.onUpdate){
+              this.onUpdate(this.getPath() )
+              return
+            }
            
 
           }
@@ -168,6 +172,7 @@ class SketchPad
      */
     #draw(path, cxt =this.cxt ,color = "black")
     {    
+      
             cxt.strokeStyle  = color;
             cxt.lineWidth = 3;
             cxt.beginPath();
@@ -182,10 +187,7 @@ class SketchPad
           //this.cxt.lineJoin  = "round"
             cxt.stroke();
 
-            if(this.onUpdate){
-                this.onUpdate(this.getPath() )
-                return
-              }
+            
            
 
 

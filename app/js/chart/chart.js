@@ -1,7 +1,7 @@
 class Chart{
         constructor(container,samples,options,onClick=null){
            this.samples=samples;
-     
+           this.dynamicPoint = null
            this.axesLabels=options.axesLabels;
            this.styles=options.styles;
            this.icon=options.icon;
@@ -40,7 +40,13 @@ class Chart{
      
            this.#addEventListeners();
         }
-     
+
+        showDynamicPoint(points)
+        {
+         this.dynamicPoint = points
+         this.#draw()
+        }
+
         #addEventListeners(){
            const {canvas,dataTrans,dragInfo}=this;
            canvas.onmousedown=(evt)=>{
@@ -236,7 +242,12 @@ class Chart{
                  this.selectedSample,"yellow"
               );
            }
-     
+           if (this.dynamicPoint)
+           {   
+               let pixelLoc  = math.remapPoint(this.dataBounds, this.pixelBounds,this.dynamicPoint)
+               //graphics.drawPoint(ctx,pixelLoc,'rgba(0,0,0, 0.5)',10000000)
+               graphics.drawPoint(ctx,pixelLoc,'red')
+           }
            this.#drawAxes();
         }
      
