@@ -54,7 +54,15 @@ class SketchPad
      #addEventListers()
      {
           this.canvas.onmousedown = (evt) =>
-          {     this.isDrwaing = true; 
+          { 
+        
+            if(evt.target.nodeName === 'CANVAS') 
+            {
+              this.isDrwaing = true; 
+            }else{
+              return this.isDrwaing = false; 
+            } 
+                 
                 const objectRectangle  = this.canvas.getBoundingClientRect()
                 const mouse  = {
                         x : Math.round(evt.clientX - objectRectangle.x),
@@ -101,20 +109,31 @@ class SketchPad
           }
 
           document.onmouseup  = (evt) => {
-
-           if(evt.target.className === 'undo'){
+            
+            if(evt.target.nodeName === 'CANVAS') 
+            {
+              if(evt.target.className === 'undo'){
                 this.#wholeObjectPath[this.#wholeObjectPath.length -1]  = this.#path
-           }else{
-                this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
-           }
+              }else{
+                    this.#path.length > 0 ? this.#wholeObjectPath.push(this.#path):undefined
+              }
+              this.isDrwaing  = false
+              console.log(evt.target)
+            
+                if(this.onUpdate){
+                  this.onUpdate(this.getPath() )
+                  return
+                }
+         
+            }else{
+              return this.isDrwaing = false; 
+            } 
+
+         
             
          
-            this.isDrwaing  = false
-            
-            if(this.onUpdate){
-              this.onUpdate(this.getPath() )
-              return
-            }
+          
+           
            
 
           }

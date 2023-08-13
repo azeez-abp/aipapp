@@ -233,11 +233,10 @@ fetch(fileUrl)
   
     let constainer  = document.querySelector(".chart")
     const row  = fileContent.samples.map(data=>{
-              console.log(data, "DATA")
-          //  data = {...data,point:data.points}
+
           return (data)
     }  )
-     console.log(row)
+    // console.log(row)
 
     //[{x,y},{x,y},{x,y}] for clustering the data [{all x point}, {all y point}]
      const chart = new Chart(constainer, row,options,handleClick  )
@@ -251,11 +250,13 @@ fetch(fileUrl)
 
 const movePontOnChartAsWeDrawOnDrawingPad  = (paths)=>{
      let pathCount  = paths.length;
+     console.log( paths , "IS FEAR")
      let pointCount  = 0;
      paths.forEach((p)=>{
         pointCount += p.length
      })
        let feature  = [pathCount, pointCount]
+    
 
        chart.showDynamicPoint(feature)
        
